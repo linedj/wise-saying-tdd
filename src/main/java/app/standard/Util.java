@@ -1,9 +1,11 @@
 package app.standard;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Util {
     public static class File {
@@ -104,16 +106,26 @@ public class Util {
 
     public class Json {
 
-        public static String MapToJson(Map<String, Object> map) {
+        public static String mapToJson(Map<String, Object> map) {
 
-            String tmp = "";
-            for(String key : map.keySet()){
-                String value = (String)map.get(key);
-                tmp = "{\n" + "    \"%s\" : " + "\"%s\"" + "\n}";
-                tmp = tmp.formatted(key, value);
-            }
+            StringBuilder jsonBuilder = new StringBuilder();
+            jsonBuilder.append("{\n");
 
-            return tmp;
+            String str = map.keySet().stream()
+                    .map(k->map.get(k) instanceof String
+                            ? "    \"%s\" : \"%s\"".formatted(k, map.get(k))
+                            : "    \"%s\" : %s".formatted(k, map.get(k)))
+                    .collect(Collectors.joining(",\n"));
+
+            jsonBuilder.append(str);
+            jsonBuilder.append("\n}");
+
+            return jsonBuilder.toString();
+        }
+
+        public static void writeAsMap(String filePath, Map<String, Object> wiseSayingMap) {
+            String jsonStr = mapToJson(wiseSayingMap);
+            File.write(filePath, jsonStr);
         }
     }
 }
