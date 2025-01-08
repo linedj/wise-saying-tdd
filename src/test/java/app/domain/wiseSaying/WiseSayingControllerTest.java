@@ -1,13 +1,28 @@
 package app.domain.wiseSaying;
 
+import app.global.AppConfig;
 import app.standard.TestBot;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import app.standard.Util;
+import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class WiseSayingControllerTest {
 
+    @BeforeAll
+    static void beforeAll() {
+        AppConfig.setTestMode();
+    }
+
+    @BeforeEach
+    void before() {
+        Util.File.deleteForce(AppConfig.getDbPath());
+    }
+
+    @AfterEach
+    void after() {
+        Util.File.deleteForce(AppConfig.getDbPath());
+    }
 
     @Test
     void t1() {
@@ -189,4 +204,19 @@ public class WiseSayingControllerTest {
                 .doesNotContain("1 / 작자미상 / 현재를 사랑하라.")
                 .contains("1 / 새 작가 / 새 명언 내용");
     }
+
+
+    @Test
+    @DisplayName("목록 - 명언이 하나도 등록되지 않았을 때")
+    void t13() {
+        String out = TestBot.run("""
+                목록
+                """);
+
+        assertThat(out)
+                .contains("등록된 명언이 없습니다.");
+    }
+
+
+
 }

@@ -1,22 +1,22 @@
-package app.domain.wiseSaying;
+package app.domain.wiseSaying.repository;
+
+import app.domain.wiseSaying.WiseSaying;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class WiseSayingRepository {
+public class WiseSayingMemRepository implements WiseSayingRepository {
 
     private final List<WiseSaying> wiseSayingList;
     private int lastId;
 
-    public WiseSayingRepository() {
+    public WiseSayingMemRepository() {
         wiseSayingList = new ArrayList<>();
+        System.out.println("메모리 DB 사용");
     }
 
     public WiseSaying save(WiseSaying wiseSaying) {
-
-        // 명언 등록 / 수정 구별?
-
         if(!wiseSaying.isNew()) {
             return wiseSaying;
         }
