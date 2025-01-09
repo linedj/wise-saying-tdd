@@ -1,5 +1,6 @@
 package app.domain.wiseSaying.repository;
 
+import app.domain.wiseSaying.Page;
 import app.domain.wiseSaying.WiseSaying;
 import app.domain.wiseSaying.WiseSayingService;
 import app.global.AppConfig;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 public class WiseSayingFileRepository implements WiseSayingRepository {
 
-    private static final String DB_PATH = AppConfig.getDbPath() +"/wiseSaying";
+    private static final String DB_PATH = AppConfig.getDbPath() + "/wiseSaying";
     private static final String ID_FILE_PATH = DB_PATH + "/lastId.txt";
     private static final String BUILD_PATH = DB_PATH + "/build/data.json";
 
@@ -25,11 +26,11 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
     }
 
     public void init() {
-        if(!Util.File.exists(ID_FILE_PATH)) {
+        if (!Util.File.exists(ID_FILE_PATH)) {
             Util.File.createFile(ID_FILE_PATH);
         }
 
-        if(!Util.File.exists(DB_PATH)) {
+        if (!Util.File.exists(DB_PATH)) {
             Util.File.createDir(DB_PATH);
         }
     }
@@ -38,38 +39,20 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
 
         boolean isNew = wiseSaying.isNew();
 
-        if(isNew) {
+        if (isNew) {
             wiseSaying.setId(getLastId() + 1);
         }
 
         Util.Json.writeAsMap(getFilePath(wiseSaying.getId()), wiseSaying.toMap());
 
-        if(isNew) {
+        if (isNew) {
             setLastId(wiseSaying.getId());
         }
 
         return wiseSaying;
     }
 
-    public List<WiseSaying> findAll() {
-
-
-
-//        명령형
-//        List<Path> paths = Util.File.getPaths(DB_PATH);
-//        List<WiseSaying> wiseSayingList = new ArrayList<>();
-//
-//        for(Path path : paths) {
-//            String filePath = path.toString();
-//            Map<String, Object> map = Util.Json.readAsMap(filePath);
-//            WiseSaying wiseSaying = WiseSaying.fromMap(map);
-//            wiseSayingList.add(wiseSaying);
-//        }
-//
-//        return wiseSayingList;
-
-
-        // 선언형
+    List<WiseSaying> findAll() {
         return Util.File.getPaths(DB_PATH).stream()
                 .map(Path::toString)
                 .filter(path -> path.endsWith(".json"))
@@ -77,6 +60,38 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
                 .map(WiseSaying::fromMap)
                 .toList();
 
+    }
+    public Page findByKeyword(String ktype, String kw, int itemsPerPage, int page) {
+
+        List<WiseSaying> searchedWiseSayings = findAll().stream()
+                .filter(w->{
+                    if(ktype.equals("content")){
+                        return w.getContent().contains(kw);
+                    }else{
+                        return w.getAuthor().contains(kw);
+                    }
+                })
+                .toList();
+
+        int totalItems = searchedWiseSayings.size();
+
+        List<WiseSaying> searchedResult = searchedWiseSayings.stream()
+                .skip((long)(page - 1) * itemsPerPage)
+                .limit(itemsPerPage)
+                .toList();
+
+        return new Page(searchedResult,totalItems,itemsPerPage);
+    }
+
+    public Page findAll(int itemsPerPage, int page) {
+        List<WiseSaying> wiseSayings = findAll();
+
+        List<WiseSaying> pageContetnt = wiseSayings.stream()
+                .skip((long)(page - 1) * itemsPerPage)
+                .limit(itemsPerPage)
+                .toList();
+
+        return new Page(pageContetnt, wiseSayings.size(), itemsPerPage);
     }
 
     public boolean deleteById(int id) {
@@ -102,7 +117,7 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
     public int getLastId() {
         String idStr = Util.File.readAsString(ID_FILE_PATH);
 
-        if(idStr.isEmpty()) {
+        if (idStr.isEmpty()) {
             return 0;
         }
 
@@ -118,15 +133,28 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
     }
 
     public void build() {
-        List<Map<String,Object>> mapList = findAll().stream()
-                        .map(WiseSaying::toMap)
-                        .toList();
+
+        List<Map<String, Object>> mapList = findAll().stream()
+                .map(WiseSaying::toMap)
+                .toList();
 
         String jsonStr = Util.Json.listToJson(mapList);
-        Util.File.write(BUILD_PATH,jsonStr);
+        Util.File.write(BUILD_PATH, jsonStr);
+    }
+
+    @Override
+    public void makeSampleData(int cnt) {
+        for(int i = 1; i <= cnt; i++) {
+            WiseSaying wiseSaying = new WiseSaying("명언" + i, "작가" + i);
+            save(wiseSaying);
+        }
     }
 
     public static String getBuildPath() {
         return BUILD_PATH;
+    }
+
+    public int count() {
+        return findAll().size();
     }
 }

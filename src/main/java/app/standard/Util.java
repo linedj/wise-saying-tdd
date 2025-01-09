@@ -37,6 +37,7 @@ public class Util {
         }
 
         public static void write(String file, int content) {
+
             write(file, String.valueOf(content));
         }
 

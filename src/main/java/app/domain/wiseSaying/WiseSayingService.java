@@ -1,3 +1,4 @@
+
 package app.domain.wiseSaying;
 
 import app.domain.wiseSaying.repository.RepositoryProvider;
@@ -20,8 +21,8 @@ public class WiseSayingService {
         return wiseSayingRepository.save(wiseSaying);
     }
 
-    public List<WiseSaying> getAllItems() {
-        return wiseSayingRepository.findAll();
+    public Page getAllItems(int itemsPerPage, int page) {
+        return wiseSayingRepository.findAll(itemsPerPage, page);
     }
 
     public boolean delete(int id) {
@@ -43,15 +44,17 @@ public class WiseSayingService {
         wiseSayingRepository.build();
     }
 
-    public List<WiseSaying> search(String ktype, String kw) {
-        return wiseSayingRepository.findAll().stream()
-                .filter(w-> {
-                    if(ktype.equals("content")) {
-                        return w.getContent().contains(kw);
-                    }else{
-                        return w.getAuthor().contains(kw);
-                    }
-                })
-                .toList();
+    public Page search(String ktype, String kw, int itemsPerPage, int page) {
+
+        return wiseSayingRepository.findByKeyword(ktype, kw, itemsPerPage, page);
+
+    }
+
+    public void makeSampleData(int cnt) {
+        wiseSayingRepository.makeSampleData(cnt);
+    }
+
+    public int count() {
+        return wiseSayingRepository.count();
     }
 }

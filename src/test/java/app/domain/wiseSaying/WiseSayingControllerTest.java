@@ -1,7 +1,7 @@
+
 package app.domain.wiseSaying;
 
 import app.domain.wiseSaying.repository.WiseSayingFileRepository;
-import app.domain.wiseSaying.repository.WiseSayingRepository;
 import app.global.AppConfig;
 import app.standard.TestBot;
 import app.standard.Util;
@@ -230,8 +230,11 @@ public class WiseSayingControllerTest {
                 작자미상
                 빌드
                 """);
+
+
         boolean rst = Util.File.exists(WiseSayingFileRepository.getBuildPath());
         assertThat(rst).isTrue();
+
     }
 
     @Test
@@ -246,9 +249,72 @@ public class WiseSayingControllerTest {
                 작자미상
                 목록?keywordType=content&keyword=과거
                 """);
+
         assertThat(out)
                 .contains("2 / 작자미상 / 과거에 집착하지 마라.")
                 .doesNotContain("1 / 작자미상 / 현재를 사랑하라.");
     }
 
+    @Test
+    @DisplayName("페이징 - 샘플데이터 생성")
+    void t16() {
+
+        TestBot.makeSample(10);
+
+        String out = TestBot.run("""
+                목록
+                """);
+
+        assertThat(out)
+                .contains("1 / 작가1 / 명언1")
+                .contains("10 / 작가10 / 명언10");
+    }
+
+    @Test
+    @DisplayName("페이징 - 페이징 UI 출력")
+    void t17() {
+
+        TestBot.makeSample(10);
+
+        String out = TestBot.run("""
+                목록?page=2
+                """);
+
+        assertThat(out)
+                .contains("1 / [2]");
+
+    }
+
+    @Test
+    @DisplayName("페이징 - 페이징 UI 출력, 샘플 개수에 맞는 페이지 출력")
+    void t18() {
+
+        TestBot.makeSample(30);
+
+        String out = TestBot.run("""
+                목록?page=4
+                """);
+
+        assertThat(out)
+                .contains("1 / 2 / 3 / [4] / 5 / 6");
+
+    }
+
+    @Test
+    @DisplayName("페이징 - 실제 페이지에 맞는 데이터 가져오기")
+    void t19() {
+
+        TestBot.makeSample(15);
+
+        String out = TestBot.run("""
+                목록?keywordType=content&keyword=1
+                """);
+
+        assertThat(out)
+                .containsSubsequence("15 / 작가15 / 명언15", "14 / 작가14 / 명언14")
+                        .doesNotContain("10 / 작가10 / 명언10");
+        assertThat(out)
+                .contains("[1] / 2");
+
+    }
 }

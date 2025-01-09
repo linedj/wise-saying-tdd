@@ -1,3 +1,4 @@
+
 package app.domain.wiseSaying;
 
 import lombok.*;

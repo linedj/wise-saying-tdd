@@ -1,3 +1,4 @@
+
 package app.global;
 
 public class AppConfig {
