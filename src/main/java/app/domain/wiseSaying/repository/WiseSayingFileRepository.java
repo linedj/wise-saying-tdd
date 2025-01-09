@@ -49,6 +49,30 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
         return wiseSaying;
     }
 
+    public Page<WiseSaying> findByKeyword(String ktype, String kw, int itemsPerPage, int page) {
+
+        List<WiseSaying> searchedWiseSayings = findAll().stream()
+                .filter(w -> {
+                    if (ktype.equals("content")) {
+                        return w.getContent().contains(kw);
+                    } else {
+                        return w.getAuthor().contains(kw);
+                    }
+                })
+                .sorted(Comparator.comparing(WiseSaying::getId).reversed()) // 기본은 오름차순. 내림차순
+                .toList();
+
+        return pageOf(searchedWiseSayings, itemsPerPage, page);
+    }
+
+    public Page<WiseSaying> findAll(int itemsPerPage, int page) {
+        List<WiseSaying> sortedWiseSayings = findAll().stream()
+                .sorted(Comparator.comparing(WiseSaying::getId).reversed())
+                .toList();
+
+        return pageOf(sortedWiseSayings, itemsPerPage, page);
+    }
+
     List<WiseSaying> findAll() {
         return Util.File.getPaths(DB_PATH).stream()
                 .map(Path::toString)
@@ -58,39 +82,16 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
                 .toList();
 
     }
-    public Page<WiseSaying> findByKeyword(String ktype, String kw, int itemsPerPage, int page) {
 
-        List<WiseSaying> searchedWiseSayings = findAll().stream()
-                .filter(w->{
-                    if(ktype.equals("content")){
-                        return w.getContent().contains(kw);
-                    }else{
-                        return w.getAuthor().contains(kw);
-                    }
-                })
-                .sorted(Comparator.comparingInt(WiseSaying::getId).reversed())
-                .toList();
-
-        return pageOf(searchedWiseSayings, itemsPerPage, page);
-    }
-
-    public Page<WiseSaying> findAll(int itemsPerPage, int page) {
-
-        List<WiseSaying> sortedWisSayings = findAll().stream()
-                .sorted(Comparator.comparingInt(WiseSaying::getId).reversed())
-                .toList();
-
-        return pageOf(sortedWisSayings, itemsPerPage, page);
-    }
-
-    private Page pageOf(List<WiseSaying> wiseSayings, int itemsPerPage, int page) {
+    private Page<WiseSaying> pageOf(List<WiseSaying> wiseSayings, int itemsPerPage, int page) {
         int totalItems = wiseSayings.size();
-       List<WiseSaying>pageContent =  wiseSayings.stream()
-                .skip((long)(page - 1) * itemsPerPage)
+
+        List<WiseSaying> pageContent = wiseSayings.stream()
+                .skip((long) (page - 1) * itemsPerPage)
                 .limit(itemsPerPage)
                 .toList();
 
-        return new Page<>(pageContent,totalItems,itemsPerPage);
+        return new Page<>(pageContent, totalItems, itemsPerPage, page);
     }
 
     public boolean deleteById(int id) {
@@ -143,7 +144,7 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
 
     @Override
     public void makeSampleData(int cnt) {
-        for(int i = 1; i <= cnt; i++) {
+        for (int i = 1; i <= cnt; i++) {
             WiseSaying wiseSaying = new WiseSaying("명언" + i, "작가" + i);
             save(wiseSaying);
         }

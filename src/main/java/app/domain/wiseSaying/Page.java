@@ -1,4 +1,3 @@
-
 package app.domain.wiseSaying;
 
 import lombok.AllArgsConstructor;
@@ -10,13 +9,14 @@ import java.util.List;
 public class Page<T> {
 
     @Getter
-    public List<T> content;
+    private List<T> content;
     @Getter
-    public int totalItems;
-    public int itemsPerPage;
+    private int totalItems;
+    private int itemsPerPage;
+    @Getter
+    private int page;
 
     public int getTotalPages() {
         return (int) Math.ceil((double) totalItems / itemsPerPage);
     }
-
 }
