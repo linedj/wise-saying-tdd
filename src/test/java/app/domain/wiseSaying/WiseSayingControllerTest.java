@@ -266,7 +266,6 @@ public class WiseSayingControllerTest {
                 """);
 
         assertThat(out)
-                .contains("1 / 작가1 / 명언1")
                 .contains("10 / 작가10 / 명언10");
     }
 
@@ -344,9 +343,6 @@ public class WiseSayingControllerTest {
                 목록?page=3
                 """);
 
-        assertThat(out)
-                .containsSubsequence("10 / 작가10 / 명언10", "1 / 작가1 / 명언1")
-                .doesNotContain("11 / 작가11 / 명언11");
         assertThat(out)
                 .contains("18 / 작가18 / 명언18")
                 .contains("1 / 2 / [3] / 4 / 5 / 6");

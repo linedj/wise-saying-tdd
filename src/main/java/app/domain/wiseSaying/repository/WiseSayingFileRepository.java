@@ -58,7 +58,7 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
                 .toList();
 
     }
-    public Page findByKeyword(String ktype, String kw, int itemsPerPage, int page) {
+    public Page<WiseSaying> findByKeyword(String ktype, String kw, int itemsPerPage, int page) {
 
         List<WiseSaying> searchedWiseSayings = findAll().stream()
                 .filter(w->{
@@ -68,28 +68,29 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
                         return w.getAuthor().contains(kw);
                     }
                 })
-                .toList();
-
-        int totalItems = searchedWiseSayings.size();
-
-        List<WiseSaying> searchedResult = searchedWiseSayings.stream()
                 .sorted(Comparator.comparingInt(WiseSaying::getId).reversed())
-                .skip((long)(page - 1) * itemsPerPage)
-                .limit(itemsPerPage)
                 .toList();
 
-        return new Page(searchedResult,totalItems,itemsPerPage);
+        return pageOf(searchedWiseSayings, itemsPerPage, page);
     }
 
-    public Page findAll(int itemsPerPage, int page) {
-        List<WiseSaying> wiseSayings = findAll();
+    public Page<WiseSaying> findAll(int itemsPerPage, int page) {
 
-        List<WiseSaying> pageContetnt = wiseSayings.stream()
+        List<WiseSaying> sortedWisSayings = findAll().stream()
+                .sorted(Comparator.comparingInt(WiseSaying::getId).reversed())
+                .toList();
+
+        return pageOf(sortedWisSayings, itemsPerPage, page);
+    }
+
+    private Page pageOf(List<WiseSaying> wiseSayings, int itemsPerPage, int page) {
+        int totalItems = wiseSayings.size();
+       List<WiseSaying>pageContent =  wiseSayings.stream()
                 .skip((long)(page - 1) * itemsPerPage)
                 .limit(itemsPerPage)
                 .toList();
 
-        return new Page(pageContetnt, wiseSayings.size(), itemsPerPage);
+        return new Page<>(pageContent,totalItems,itemsPerPage);
     }
 
     public boolean deleteById(int id) {
