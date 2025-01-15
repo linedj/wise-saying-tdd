@@ -93,4 +93,12 @@ public class WiseSayingDbRepository {
         String jsonStr = Util.Json.listToJson(mapList);
         Util.File.write(BUILD_PATH, jsonStr);
     }
+
+    public long count() {
+
+        return simpleDb.genSql()
+                .append("SELECT COUNT(*)")
+                .append("FROM wise_saying")
+                .selectLong();
+    }
 }
