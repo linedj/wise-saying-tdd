@@ -1,4 +1,5 @@
 package app.domain.wiseSaying.repository;
+import app.domain.wiseSaying.Page;
 import app.domain.wiseSaying.WiseSaying;
 import app.global.AppConfig;
 import app.standard.Util;
@@ -85,6 +86,14 @@ public class WiseSayingDbRepository {
                 .selectRows(WiseSaying.class);
     }
 
+    Page findAll(int itemsPerPage, int page) {
+        simpleDb.genSql()
+                .append("SELECT *")
+                .append("FROM wise_saying")
+                .append("LIMIT ?, ?", (long) (page - 1) * itemsPerPage);
+        return null;
+    }
+
     public void build() {
         List<Map<String, Object>> mapList = findAll().stream()
                 .map(WiseSaying::toMap)
@@ -101,4 +110,5 @@ public class WiseSayingDbRepository {
                 .append("FROM wise_saying")
                 .selectLong();
     }
+
 }
