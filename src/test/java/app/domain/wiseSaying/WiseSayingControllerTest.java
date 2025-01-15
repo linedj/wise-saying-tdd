@@ -1,7 +1,8 @@
-
 package app.domain.wiseSaying;
 
+import app.domain.wiseSaying.repository.RepositoryProvider;
 import app.domain.wiseSaying.repository.WiseSayingFileRepository;
+import app.domain.wiseSaying.repository.WiseSayingRepository;
 import app.global.AppConfig;
 import app.standard.TestBot;
 import app.standard.Util;
@@ -14,16 +15,21 @@ public class WiseSayingControllerTest {
     @BeforeAll
     static void beforeAll() {
         AppConfig.setTestMode();
+
+        WiseSayingRepository repo = RepositoryProvider.provide();
+        repo.createTable();
     }
 
     @BeforeEach
     void before() {
-        Util.File.deleteForce(AppConfig.getDbPath());
+
+        WiseSayingRepository repo = RepositoryProvider.provide();
+        repo.truncateTable();
     }
 
     @AfterEach
     void after() {
-        Util.File.deleteForce(AppConfig.getDbPath());
+
     }
 
     @Test
@@ -300,10 +306,21 @@ public class WiseSayingControllerTest {
     }
 
     @Test
-    @DisplayName("페이징 - 실제 페이지에 맞는 데이터 가져오기")
+    @DisplayName("페이징 - 실제 페이제 맞는 데이터 가져오기1")
     void t19() {
-
         TestBot.makeSample(15);
+
+        // 1 / 작가1 / 명언1
+        // 2 / 작가2 / 명언2
+        // 3 / 작가3 / 명언3
+        // ....
+        // 15 / 작가15 / 명언15
+
+        // 1, 10, 11, 12, 13, 14, 15
+
+        // 15, 14, 13, 12, 11  - 1 페이지
+        // 10, 1 - 2 페이지
+
 
         String out = TestBot.run("""
                 목록?keywordType=content&keyword=1
@@ -311,18 +328,17 @@ public class WiseSayingControllerTest {
 
         assertThat(out)
                 .containsSubsequence("15 / 작가15 / 명언15", "14 / 작가14 / 명언14")
-                        .doesNotContain("10 / 작가10 / 명언10");
+                .doesNotContain("10 / 작가10 / 명언10");
+
         assertThat(out)
                 .contains("[1] / 2");
 
     }
 
     @Test
-    @DisplayName("페이징 - 실제 페이지에 맞는 데이터 가져오기")
+    @DisplayName("페이징 - 실제 페이제 맞는 데이터 가져오기2")
     void t20() {
-
         TestBot.makeSample(15);
-
         String out = TestBot.run("""
                 목록?keywordType=content&keyword=1&page=2
                 """);
@@ -330,15 +346,15 @@ public class WiseSayingControllerTest {
         assertThat(out)
                 .containsSubsequence("10 / 작가10 / 명언10", "1 / 작가1 / 명언1")
                 .doesNotContain("11 / 작가11 / 명언11");
+
         assertThat(out)
                 .contains("1 / [2]");
     }
+
     @Test
-    @DisplayName("페이징 - 실제 페이지에 맞는 데이터 가져오기")
+    @DisplayName("페이징 - 실제 페이제 맞는 데이터 가져오기3")
     void t21() {
-
         TestBot.makeSample(30);
-
         String out = TestBot.run("""
                 목록?page=3
                 """);
@@ -351,6 +367,7 @@ public class WiseSayingControllerTest {
     @Test
     @DisplayName("검색 UI 출력")
     void t22() {
+
         String out = TestBot.run("""
                 등록
                 현재를 사랑하라.

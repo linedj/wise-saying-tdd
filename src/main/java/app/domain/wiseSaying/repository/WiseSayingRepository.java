@@ -13,7 +13,9 @@ public interface WiseSayingRepository {
     boolean deleteById(int id);
     Optional<WiseSaying> findById(int id);
     void build();
-    void makeSampleData(int cnt);
     int count();
+    void makeSampleData(int cnt);
     Page<WiseSaying> findByKeyword(String ktype, String kw, int itemsPerPage, int page);
+    void createTable();
+    void truncateTable();
 }
