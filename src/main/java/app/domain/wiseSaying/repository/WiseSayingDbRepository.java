@@ -30,11 +30,32 @@ public class WiseSayingDbRepository {
                 "TRUNCATE wise_saying"
         );
     }
+
     public WiseSaying save(WiseSaying wiseSaying) {
-        return null;
+        Sql sql = simpleDb.genSql();
+        sql.append("INSERT INTO wise_saying")
+                .append("SET content = ?,", wiseSaying.getContent())
+                .append("author = ?", wiseSaying.getAuthor());
+
+        long generatedId = sql.insert();
+        wiseSaying.setId((int) generatedId);
+
+        return wiseSaying;
     }
 
     public Optional<WiseSaying> findById(int id) {
-        return null;
+
+        Sql sql = simpleDb.genSql();
+        sql.append("SELECT *")
+                .append("FROM wise_saying")
+                .append("WHERE id = ?", id);
+
+        WiseSaying wiseSaying = sql.selectRow(WiseSaying.class);
+
+        if(wiseSaying == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(wiseSaying);
     }
 }
