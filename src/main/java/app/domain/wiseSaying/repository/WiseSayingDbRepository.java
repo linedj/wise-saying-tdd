@@ -1,5 +1,9 @@
 package app.domain.wiseSaying.repository;
+import app.domain.wiseSaying.WiseSaying;
 import app.standard.simpleDb.SimpleDb;
+import app.standard.simpleDb.Sql;
+
+import java.util.Optional;
 
 public class WiseSayingDbRepository {
 
@@ -25,5 +29,12 @@ public class WiseSayingDbRepository {
         simpleDb.run(
                 "TRUNCATE wise_saying"
         );
+    }
+    public WiseSaying save(WiseSaying wiseSaying) {
+        return null;
+    }
+
+    public Optional<WiseSaying> findById(int id) {
+        return null;
     }
 }
